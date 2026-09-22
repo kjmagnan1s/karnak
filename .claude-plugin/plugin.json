@@ -1,0 +1,115 @@
+{
+  "name": "karnak",
+  "version": "0.2.0",
+  "description": "Jev picks the reasoning effort for every model request inside a Claude Code turn: more thinking when the next step is hard, less for routine steps. Ares-style per-step routing.",
+  "license": "MIT",
+  "userConfig": {
+    "mode": {
+      "type": "string",
+      "title": "Jev effort mode",
+      "description": "auto: Jev sets effort before every model request. off: the session's own effort is used.",
+      "options": [
+        "auto",
+        "off"
+      ],
+      "default": "auto"
+    },
+    "ceiling": {
+      "type": "string",
+      "title": "Effort ceiling",
+      "description": "Highest effort Jev may pick. session uses the session's configured effort as the ceiling. max is never picked: a session at max is capped at xhigh.",
+      "options": [
+        "session",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "default": "session"
+    },
+    "floor": {
+      "type": "string",
+      "title": "Effort floor",
+      "description": "Lowest effort Jev may pick.",
+      "options": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "low"
+    },
+    "firstStepMinimum": {
+      "type": "string",
+      "title": "First step minimum",
+      "description": "Minimum effort for the first model request of a turn, the one that reads the new prompt and plans.",
+      "options": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "subagents": {
+      "type": "boolean",
+      "title": "Route subagent steps",
+      "description": "Also pick effort for subagent model requests.",
+      "default": true
+    },
+    "historyMessages": {
+      "type": "number",
+      "title": "History messages",
+      "description": "How many recent transcript messages Jev sees when deciding.",
+      "default": 12
+    },
+    "timeoutMs": {
+      "type": "number",
+      "title": "Jev timeout (ms)",
+      "description": "If Jev has not answered by then, the step goes out at the session's effort.",
+      "default": 2000
+    },
+    "confidenceFloor": {
+      "type": "number",
+      "title": "Confidence floor",
+      "description": "Below this Jev confidence the step keeps the session's effort.",
+      "default": 0.45
+    },
+    "showStatus": {
+      "type": "boolean",
+      "title": "Show status line",
+      "description": "Pin the chosen effort under the prompt.",
+      "default": true
+    },
+    "log": {
+      "type": "boolean",
+      "title": "Log every decision",
+      "description": "Write one transcript log line per routed step.",
+      "default": false
+    },
+    "model": {
+      "type": "string",
+      "title": "Jev model",
+      "description": "TypeSafe Jev model name.",
+      "default": "jev-latest"
+    },
+    "apiKey": {
+      "type": "string",
+      "title": "TypeSafe API key",
+      "description": "Leave unset to use TYPESAFE_API_KEY from the environment or settings env.",
+      "sensitive": true
+    }
+  },
+  "author": {
+    "name": "Kevin Magnan",
+    "url": "https://github.com/kjmagnan1s"
+  },
+  "homepage": "https://github.com/kjmagnan1s/karnak",
+  "repository": "https://github.com/kjmagnan1s/karnak",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "reasoning-effort",
+    "jev",
+    "typesafe",
+    "ares"
+  ]
+}

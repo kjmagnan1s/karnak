@@ -1,0 +1,20 @@
+{
+  "name": "karnak",
+  "owner": {
+    "name": "Kevin Magnan",
+    "url": "https://github.com/kjmagnan1s"
+  },
+  "metadata": {
+    "description": "Karnak: Jev picks Claude Code's reasoning effort before every step."
+  },
+  "plugins": [
+    {
+      "name": "karnak",
+      "source": "./",
+      "description": "Jev picks the reasoning effort for every model request inside a Claude Code turn. Low for routine steps, high when recovering from a failure.",
+      "version": "0.2.0",
+      "category": "productivity",
+      "homepage": "https://github.com/kjmagnan1s/karnak"
+    }
+  ]
+}

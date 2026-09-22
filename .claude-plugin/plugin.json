@@ -1,6 +1,6 @@
 {
   "name": "karnak",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Jev picks the reasoning effort for every model request inside a Claude Code turn: more thinking when the next step is hard, less for routine steps. Ares-style per-step routing.",
   "license": "MIT",
   "userConfig": {
@@ -84,6 +84,12 @@
       "title": "Log every decision",
       "description": "Write one transcript log line per routed step.",
       "default": false
+    },
+    "models": {
+      "type": "string",
+      "title": "Models",
+      "description": "Comma-separated Claude families Karnak routes on, for example fable or fable,opus. Use * for every model. Other families run at the session effort, untouched.",
+      "default": "fable"
     },
     "model": {
       "type": "string",

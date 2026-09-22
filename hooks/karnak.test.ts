@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'claude-code/testing';
-import { buildState, decide, formatTally, emptyTally, resolveConfig, sessionLevel, type JevAnswers } from './karnak.js';
+import { buildState, decide, familyOf, modelAllowed, formatTally, emptyTally, resolveConfig, sessionLevel, type JevAnswers } from './karnak.js';
 
 const config = resolveConfig({});
 
@@ -95,5 +95,19 @@ describe('formatTally', () => {
     const text = formatTally(t, 'auto', 'high');
     expect(text.includes('low 2, high 1')).toBe(true);
     expect(text.includes('2 of 3 routed steps ran below')).toBe(true);
+  });
+});
+
+describe('model gate', () => {
+  test('routes on fable only by default', () => {
+    const config = resolveConfig({});
+    expect(modelAllowed('claude-fable-5-1', config)).toBe(true);
+    expect(modelAllowed('claude-opus-5', config)).toBe(false);
+    expect(modelAllowed('claude-sonnet-5', config)).toBe(false);
+  });
+  test('models option widens or opens the gate', () => {
+    expect(modelAllowed('claude-opus-5', resolveConfig({ models: 'fable, opus' }))).toBe(true);
+    expect(modelAllowed('claude-haiku-4-5-20251001', resolveConfig({ models: '*' }))).toBe(true);
+    expect(familyOf('claude-fable-5-1')).toBe('fable');
   });
 });

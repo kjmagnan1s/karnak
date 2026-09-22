@@ -12,7 +12,7 @@
       "name": "karnak",
       "source": "./",
       "description": "Jev picks the reasoning effort for every model request inside a Claude Code turn. Low for routine steps, high when recovering from a failure.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "productivity",
       "homepage": "https://github.com/kjmagnan1s/karnak"
     }

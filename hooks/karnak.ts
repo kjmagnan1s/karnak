@@ -43,6 +43,8 @@ export type Config = {
   showStatus: boolean;
   log: boolean;
   model: string;
+  /** Model families Karnak routes on, lowercase (`fable`, `opus`); `*` means all. */
+  models: string[];
   apiKey?: string;
 };
 
@@ -58,6 +60,7 @@ const DEFAULTS: Config = {
   showStatus: true,
   log: false,
   model: 'jev-latest',
+  models: ['fable'],
 };
 
 function isLevel(value: unknown): value is Level {
@@ -80,8 +83,21 @@ export function resolveConfig(options: PluginOptions): Config {
     if (typeof value === 'number' && Number.isFinite(value)) config[key] = value;
   }
   if (typeof options['model'] === 'string' && options['model']) config.model = options['model'];
+  if (typeof options['models'] === 'string' && options['models'].trim()) {
+    config.models = options['models'].split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  }
   if (typeof options['apiKey'] === 'string' && options['apiKey']) config.apiKey = options['apiKey'];
   return config;
+}
+
+/** "claude-fable-5-1" → "fable"; "claude-opus-5" → "opus". */
+export function familyOf(model: string): string {
+  return model.replace(/^claude-/, '').split('-')[0]?.toLowerCase() ?? '';
+}
+
+/** Karnak only routes on the families in `config.models`. Opus stays stock unless listed. */
+export function modelAllowed(model: string, config: Config): boolean {
+  return config.models.includes('*') || config.models.includes(familyOf(model));
 }
 
 // ---------------------------------------------------------------------------
@@ -469,6 +485,12 @@ async function runInit($: EngineInterface, state: PluginState, keyArg: string): 
     lines.push(`Jev call failed: ${message}. Check the key and your network, then run /karnak init again.`);
     return lines.join('\n');
   }
+  const sessionModel = await $.session.model();
+  if (!modelAllowed(sessionModel, config)) {
+    lines.push(
+      `This session runs ${familyOf(sessionModel) || sessionModel}. Karnak routes on ${config.models.join(', ')} only and stays idle here. Switch with /model, or add families under "Models" in /config.`,
+    );
+  }
   const chosen = await askSetupQuestions($, config);
   if (chosen.length > 0) lines.push(`Setup: ${chosen.join(', ')}.`);
   state.modeOverride = 'auto';
@@ -561,7 +583,7 @@ export const register: Register = (on: On, options: PluginOptions) => {
   const mode = () => modeOverride ?? config.mode;
   /** "Fable/Jev", "Opus/Jev": the model's family name over the router's. */
   const label = () => {
-    const family = lastModel.replace(/^claude-/, '').split('-')[0] ?? '';
+    const family = familyOf(lastModel);
     const name = family ? family.charAt(0).toUpperCase() + family.slice(1) : 'Claude';
     return `${name}/Jev`;
   };
@@ -584,7 +606,7 @@ export const register: Register = (on: On, options: PluginOptions) => {
       description: 'Jev-routed reasoning effort: init (first-run check), status, or auto / off / reset',
       argumentHint: '[init [key]|auto|off|reset]',
     });
-    if (mode() === 'auto' && config.showStatus) $.ui.status(`${label()}: waiting for the first step`);
+    if (mode() === 'auto' && config.showStatus && modelAllowed(lastModel, config)) $.ui.status(`${label()}: waiting for the first step`);
     return next(e);
   });
 
@@ -594,7 +616,10 @@ export const register: Register = (on: On, options: PluginOptions) => {
     const session = sessionLevel(e.effort);
     if (session) lastSession = session;
     const skip =
-      mode() === 'off' || session === undefined || (e.agentId !== undefined && !config.subagents);
+      mode() === 'off' ||
+      session === undefined ||
+      !modelAllowed(e.model, config) ||
+      (e.agentId !== undefined && !config.subagents);
     if (skip) {
       tally.skipped += 1;
       return yield* next(e);
@@ -669,6 +694,7 @@ export const register: Register = (on: On, options: PluginOptions) => {
     if (arg !== '') {
       return { text: `unknown subcommand "${raw}". Use /karnak (tally), /karnak init [key], /karnak auto, /karnak off, or /karnak reset. Settings live in /config.` };
     }
-    return { text: formatTally(tally, mode(), lastSession).replace(/^karnak: /, `${label()} `) };
+    const idle = lastModel && !modelAllowed(lastModel, config) ? ` (idle: ${familyOf(lastModel)} is not in models ${config.models.join(',')})` : '';
+    return { text: formatTally(tally, mode(), lastSession).replace(/^karnak: /, `${label()} `).replace(/^(.*)$/m, `$1${idle}`) };
   });
 };

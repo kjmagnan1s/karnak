@@ -2,7 +2,7 @@
 
 **Adaptive reasoning effort for Claude Code. Jev picks how hard Claude thinks before every step of a turn.**
 
-Karnak is a Claude Code plugin. Before each model request inside a turn, it shows [Jev](https://typesafe.ai) the task and the recent history, asks how much reasoning the *next* step needs, and sets the request's effort to match. Routine steps (read a file, list a folder, run a predictable command) go out at low. Steps that recover from a failure or make a design call go out at high or xhigh. Your session's effort setting is the ceiling.
+Karnak is a Claude Code plugin for Fable. Before each model request inside a turn, it shows [Jev](https://typesafe.ai) the task and the recent history, asks how much reasoning the *next* step needs, and sets the request's effort to match. Routine steps (read a file, list a folder, run a predictable command) go out at low. Steps that recover from a failure or make a design call go out at high or xhigh. Your session's effort setting is the ceiling.
 
 The name: Karnak is the Inhuman who sees the fault line in anything and strikes with the least force that works. The router follows the same rule. It picks the lowest rung that still produces the right action.
 
@@ -106,6 +106,7 @@ Jev places the next step on one of four rungs. Each maps to an effort level:
 
 ### The rules on top
 
+- **Fable only, by default.** Karnak routes on Fable and leaves every other model at the session effort. To include another family, set `models` in `/config` to `fable,opus`, or `*` for all. Sessions on an unlisted model show `idle` in the tally, and `/karnak init` says so.
 - **Karnak lifts the level after a failure.** Jev also answers a yes/no question: do the latest tool results show a failure that forces a change of course? Above 0.6, Karnak sets the step to at least high. The Ares paper found this the clearest single signal. Steps that recover from a wrong path need the most thinking.
 - **The first step of a turn has a minimum.** It reads the new prompt and plans, so it never drops below medium by default.
 - **Karnak keeps your setting when Jev is unsure.** If Jev's confidence is under the floor (0.45 by default), the step runs at whatever you set.

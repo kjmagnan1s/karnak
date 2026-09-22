@@ -139,6 +139,7 @@ The tally shows the level distribution, the cache hit rate, and what Jev cost. S
 - **The status line never appears.** Routing is off, or the session has no effort setting to use as a ceiling. Run `/karnak` to see the mode, and `/karnak init` to check the key.
 - **"no TypeSafe key found" toast.** Run `/karnak init`. It lists where it looked.
 - **Every step reads "kept"** with `log` on in `/config`. Jev is failing or timing out, and `/karnak init` shows you why by making one call and printing the error.
+- **The configure screen in `/plugin` won't change a value.** In some Claude Code builds the arrow keys move between the tabs instead. Set values from the shell instead, and rerun the install command with the options you want, for example `claude plugin install karnak@karnak --config ceiling=high --config log=true`. Every option has a default, so nothing has to be set for routing to work.
 - **The plugin does not load after a Claude Code update.** Run `/plugin-types` to regenerate `types/claude-code.d.ts`, then `claude plugin validate .` to see what changed.
 
 ## Development

@@ -470,7 +470,7 @@ async function runInit($: EngineInterface, state: PluginState, keyArg: string): 
     return lines.join('\n');
   }
   const chosen = await askSetupQuestions($, config);
-  if (chosen.length > 0) lines.push(`Saved: ${chosen.join(', ')}.`);
+  if (chosen.length > 0) lines.push(`Setup: ${chosen.join(', ')}.`);
   state.modeOverride = 'auto';
   await $.store.set('modeOverride', 'auto');
   const session = state.lastSession ?? 'unknown until the first step';
@@ -526,8 +526,10 @@ async function askSetupQuestions($: EngineInterface, config: Config): Promise<st
       config.showStatus = statusValue;
       await set('showStatus', statusValue, `status line ${statusValue ? 'on' : 'off'}`);
     }
-  } catch {
+  } catch (error) {
     // No one to ask (a -p run) or the dialog was dismissed: defaults stand.
+    const message = error instanceof Error ? error.message : String(error);
+    saved.push(`setup questions skipped (${message}); defaults stand`);
   }
   return saved;
 }

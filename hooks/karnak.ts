@@ -609,7 +609,10 @@ export const register: Register = (on: On, options: PluginOptions) => {
     }
     if (arg === 'reset') {
       Object.assign(tally, emptyTally());
-      return { text: 'karnak: tally reset' };
+      return { text: 'tally reset' };
+    }
+    if (arg !== '') {
+      return { text: `unknown subcommand "${raw}". Use /karnak (tally), /karnak init [key], /karnak auto, /karnak off, or /karnak reset. Settings live in /config.` };
     }
     return { text: formatTally(tally, mode(), lastSession).replace(/^karnak: /, `${label()} `) };
   });

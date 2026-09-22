@@ -15,13 +15,21 @@ You need Claude Code with function hooks enabled, a [TypeSafe](https://typesafe.
 
 ### 1. Install
 
-Claude Code auto-loads plugins from its skills folder:
+Inside Claude Code, add the repo as a plugin marketplace and install from it:
 
-```sh
-git clone https://github.com/kjmagnan1s/karnak ~/.claude/skills/karnak
+```
+/plugin marketplace add kjmagnan1s/karnak
+/plugin install karnak@karnak
 ```
 
-To try it for one session instead, start Claude Code with `claude --plugin-dir /path/to/karnak`.
+The same two commands work from your shell with `claude plugin marketplace add kjmagnan1s/karnak` and `claude plugin install karnak@karnak`. Claude Code checks the marketplace for updates, and `/plugin` manages enable, disable, and uninstall.
+
+Other ways to load it:
+
+- **From a clone.** `git clone https://github.com/kjmagnan1s/karnak ~/.claude/skills/karnak`. Claude Code auto-loads plugins from that folder.
+- **For one session.** `claude --plugin-dir /path/to/karnak`.
+
+To store the key in the plugin's own config at install time, pass it as a config value: `claude plugin install karnak@karnak --config apiKey=<your-key>`. Otherwise the next step finds it for you.
 
 ### 2. Run the first-run check
 

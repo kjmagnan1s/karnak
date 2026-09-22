@@ -469,14 +469,67 @@ async function runInit($: EngineInterface, state: PluginState, keyArg: string): 
     lines.push(`Jev call failed: ${message}. Check the key and your network, then run /karnak init again.`);
     return lines.join('\n');
   }
+  const chosen = await askSetupQuestions($, config);
+  if (chosen.length > 0) lines.push(`Saved: ${chosen.join(', ')}.`);
   state.modeOverride = 'auto';
   await $.store.set('modeOverride', 'auto');
   const session = state.lastSession ?? 'unknown until the first step';
   const ceiling = config.ceiling === 'session' ? `the session effort (${session}, capped at xhigh)` : config.ceiling;
   lines.push(`Mode: auto. Ceiling: ${ceiling}. Floor: ${config.floor}. First step of a turn: at least ${config.firstStepMinimum}.`);
-  lines.push("Ready. The status line under the prompt shows each step's effort. /karnak shows the tally; /config tunes the rest.");
+  lines.push(
+    config.showStatus
+      ? "Ready. The status line under the prompt shows each step's effort. /karnak shows the tally; run /karnak init again or use /config to change settings."
+      : 'Ready. /karnak shows the tally; run /karnak init again or use /config to change settings.',
+  );
   if (config.showStatus) $.ui.status(`${state.label()}: waiting for the next step`);
   return lines.join('\n');
+}
+
+/**
+ * The three choices worth asking at setup: ceiling, first-step minimum, and the
+ * status line. Each answer is written to the plugin's config and applied to the
+ * live config. In a headless run `$.ui.ask` rejects, and every default stands.
+ */
+async function askSetupQuestions($: EngineInterface, config: Config): Promise<string[]> {
+  const saved: string[] = [];
+  const set = async (key: string, value: string | boolean, note: string) => {
+    const { deny } = await $.config.set({ key, value });
+    if (!deny) saved.push(note);
+  };
+  try {
+    const ceiling = await $.ui.ask('How high may Jev take a step? The session effort is what /effort shows.', {
+      options: ['Up to the session effort', 'Never above high', 'Never above medium'],
+      header: 'Ceiling',
+    });
+    const ceilingValue = ceiling === 'Never above high' ? 'high' : ceiling === 'Never above medium' ? 'medium' : 'session';
+    if (ceilingValue !== config.ceiling) {
+      config.ceiling = ceilingValue;
+      await set('ceiling', ceilingValue, `ceiling ${ceilingValue}`);
+    }
+
+    const first = await $.ui.ask('The first step of a turn reads your prompt and plans. What is its minimum effort?', {
+      options: ['Medium', 'High', 'Low'],
+      header: 'First step',
+    });
+    const firstValue = first === 'High' ? 'high' : first === 'Low' ? 'low' : 'medium';
+    if (isLevel(firstValue) && firstValue !== config.firstStepMinimum) {
+      config.firstStepMinimum = firstValue;
+      await set('firstStepMinimum', firstValue, `first step ${firstValue}`);
+    }
+
+    const status = await $.ui.ask('Show the chosen effort under the prompt as you work?', {
+      options: ['Yes', 'No'],
+      header: 'Status line',
+    });
+    const statusValue = status !== 'No';
+    if (statusValue !== config.showStatus) {
+      config.showStatus = statusValue;
+      await set('showStatus', statusValue, `status line ${statusValue ? 'on' : 'off'}`);
+    }
+  } catch {
+    // No one to ask (a -p run) or the dialog was dismissed: defaults stand.
+  }
+  return saved;
 }
 
 function withTimeout<T>($: EngineInterface, promise: Promise<T>, ms: number): Promise<T> {

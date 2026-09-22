@@ -1,6 +1,6 @@
 {
   "name": "karnak",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Jev picks the reasoning effort for every model request inside a Claude Code turn: more thinking when the next step is hard, less for routine steps. Ares-style per-step routing.",
   "license": "MIT",
   "userConfig": {

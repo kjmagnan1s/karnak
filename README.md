@@ -45,13 +45,14 @@ It looks for your key in the plugin config, then `TYPESAFE_API_KEY` in the envir
 /karnak init <your-key>
 ```
 
-Then it makes one small Jev call and reports the latency, the token count, and the mode, ceiling, and floor it will use. Example:
+Then it makes one small Jev call and reports the latency and the token count. After that it asks three questions, each a picker: how high Jev may take a step (the session effort, or a fixed cap), the minimum effort for the first step of a turn, and whether to show the chosen effort under the prompt. Your answers are saved to the plugin's config. Run `/karnak init` again at any time to change them. Example:
 
 ```
 karnak: Key: found in macOS Keychain.
 Jev: answered in 355 ms, 613 input tokens. Probe step "list the files" → low (rung 0.0).
+Saved: ceiling session, first step medium, status line on.
 Mode: auto. Ceiling: the session effort (high, capped at xhigh). Floor: low. First step of a turn: at least medium.
-Ready. The status line under the prompt shows each step's effort. /karnak shows the tally; /config tunes the rest.
+Ready. The status line under the prompt shows each step's effort. /karnak shows the tally; run /karnak init again or use /config to change settings.
 ```
 
 ### 3. Work
